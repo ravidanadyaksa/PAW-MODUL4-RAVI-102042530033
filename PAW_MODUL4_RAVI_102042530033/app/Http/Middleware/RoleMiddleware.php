@@ -8,10 +8,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, string $role): Response
-    {
-        abort_unless($request->user() && $request->user()->role === $role, 403);
+    public function handle(Request $request, Closure $next, string ...$roles): Response
+{
+    $user = $request->user();
 
-        return $next($request);
+    if (! $user || ! in_array($user->role, $roles, true)) {
+        return redirect()->route('home')
+            ->with('error', 'Akses ditolak! Anda tidak memiliki izin untuk mengakses halaman tersebut.');
     }
+
+    return $next($request);
 }
+}
+
